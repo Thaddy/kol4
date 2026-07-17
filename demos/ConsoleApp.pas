@@ -3,7 +3,7 @@ unit ConsoleApp;
 interface
 uses
   Windows,
-  Kol4 in '..\kol4.pas';
+  Kol in '..\kol.pas';
 
 {02/12/01 Adapted for Kol by Thaddy de Koning,
  Note that this is a Q and D conversion:

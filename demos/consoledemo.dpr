@@ -17,7 +17,7 @@ Thaddy de Koning
 
 {$ifdef fpc}{$mode delphi}{$endif}
 uses
-Kol4 in '..\kol4.pas',
+Kol in '..\kol.pas',
 ConsoleApp;
 var
   List:pStrlist;

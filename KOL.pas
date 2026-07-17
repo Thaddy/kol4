@@ -1,18 +1,9 @@
-//[START OF KOL.pas]
-// This is a KOL version 4.00 RC
-// The sourcecode is cleaned up and the assembler sections are disabled.
-// Old code is removed. Default is SMALLEST_CODE and USE_FLAGS
-// This means it is always pure pascal.
-// Modern compilers remove the need for an assembler version
-// Maintenance by Thaddy de Koning, July 2026
-// thaddydekoning[at]gmail.com
-// The project is maintained on github
-// https://github.com/Thaddy/kol4/
-// This is based unofficial version compatible with fpc >=2.6.2 and x64 compilers
-// Dmitri K dmiko@mail333.com
-// dmiko comments below means Dmitri changed smth. in the original code
-// tdk means Thaddy changed or commented the original code (no changes yet)
-// 
+//[START OF KOL4.pas]
+// This release is written by Thaddy de Koning  (thaddydekoning<at>gmail.com)
+//Based on the unofficial version compatible with fpc >=2.6.2 and x64 compilers
+//Dmitri K dmiko@mail333.com
+//dmiko comments below mean I changed smth. in the original code
+
 {****************************************************************
 
         KKKKK    KKKKK    OOOOOOOOO    LLLLL
@@ -28,7 +19,7 @@
   Key Objects Library (C) 2000 by Vladimir Kladov.
 
 ****************************************************************
-* VERSION 4.00 RC
+* VERSION 4.0.0 beta
 ****************************************************************
 
   K.O.L. - is a set of objects and functions to create small programs
@@ -37,12 +28,11 @@
   KOL is less power then the VCL - perhaps just the opposite...
 
   KOL is provided free with the source code.
-  Copyright (C) Vladimir Kladov, 2000-2011.
+  Copyright (C) Vladimir Kladov, 2000-2026.
 
   For code provided by other  developers (even if later
   changed by me) authors are noted in the source.
 
-  tdk these do no longer work, contact me instead on github 
   mailto: vk@kolmck.net
   Web-Page: http://kolmck.net
 
@@ -71,21 +61,10 @@
 
   {$DEFINE GDI}
 
-{$UNDEF LIN} {$UNDEF WIN} {$UNDEF GDI}
-{$IFDEF LINUX}
-  {$DEFINE UNIX}
-  {$DEFINE LIN}
-  {$DEFINE PAS_VERSION}
-  {$DEFINE NOT_USE_RICHEDIT}
-  {$IFNDEF GTK}
-    {$IFNDEF XQT}
-      {$DEFINE GTK} // it is also possible to define GTK as a project option
-    {$ENDIF XQT}    // even for Windows system
-  {$ENDIF GTK}
-{$ELSE}         // to exploit GTK under Win32 rather then native GDI
+ {$UNDEF WIN} {$UNDEF GDI}
+         // to exploit GTK under Win32 rather then native GDI
   {$DEFINE WIN}
   {$DEFINE GDI}
-{$ENDIF}
 
   {$IFDEF GTK} {$UNDEF GDI} {$DEFINE _X_}
                {$DEFINE NOT_USE_RICHEDIT}
@@ -101,15 +80,30 @@
 {$IFDEF WIN_GDI}
   //test
 {$ENDIF WIN_GDI}
-{$IFDEF LIN}
-  //test
-{$ENDIF LIN}
 
-unit KOL;
+unit kol;
 
 {$IFDEF FPC}
-  {$MODE Delphi}
+  {$mode delphi}
+  {$hints off}
+  {$notes off}
+  {$warn 6060 off}
+  {$warn 5033 off}
+  {$warn 5024 off}
+  {$warn 5028 off}
+  {$warn 5036 off}
+  {$warn 5057 off}
+  {$warn 5091 off}
+  {$warn 5093 off}
+  {$warn 3177 off}
+  {$warn 3019 off}
+  {$warn 3100 off}
+  {$warn 4055 off}
+  {$warn 4082 off}
+  {$warn 4056 off}
+  {$asmmode intel}
 {$ENDIF}
+
 
 {*
    Please note, that KOL does not use keyword 'class'. Instead,
@@ -657,14 +651,9 @@ interface
 //{$DEFINE CHK_GDI}
 
 uses {$IFDEF WIN}messages, windows {$IFNDEF NOT_USE_RICHEDIT}, RichEdit {$ENDIF}{$ENDIF WIN}
-     {$IFDEF LIN}, Libc, Xlib{$ENDIF}
+
      {$IFDEF GTK}, Glib2 , Gdk2, Gtk2, pango {$ENDIF GTK}
      {$IFDEF CHK_GDI}, ChkGdi {$ENDIF};
-
-{$IFDEF LIN}
-  {$DEFINE global_declare} {$I KOL_Linux.inc} {$UNDEF global_declare}
-////type HDC = TGC; // from Xlib (temporary definition?)
-{$ENDIF LIN}
 
 var
   AppTheming: Boolean;
@@ -806,9 +795,7 @@ type
      {$ENDIF}
      fRefCount: Integer;
      fOnDestroy: TOnEvent;
-     {$IFDEF OLD_REFCOUNT}
-     procedure DoDestroy;
-     {$ENDIF}
+
    protected
      fAutoFree: PList;
      {* Is called from a constructor to initialize created object instance
@@ -872,9 +859,7 @@ type
         вызов Free немедленно ПЕРЕД последним RefDec. }
      property RefCount: Integer read fRefCount;
      {* }
-     {$IFDEF OLD_FREE}
-     procedure Free;
-     {$ELSE NEW_FREE}
+
      property Free: Integer read RefDec;
      {* Before calling destructor of object, checks if passed pointer is not
         nil - similar what is done in VCL for TObject. It is ALWAYS recommended
@@ -882,7 +867,6 @@ type
      {= До вызова деструктора, проверяет, не передан ли nil в качестве параметра.
         ВСЕГДА рекомендуется использовать Free вместо Destroy - см. так же RefInc,
         RefDec. }
-     {$ENDIF NEW_FREE}
 
      // By Vyacheslav Gavrik:
      function InstanceSize: Integer;
@@ -3722,7 +3706,7 @@ const
   MK_CONTROL = 8;
   MK_MBUTTON = $10;
   MK_ALT = $20;  // MK_ALT DEFINED
-  MK_LOCK = $40; // CAPS LOCK or SHIFT LOCK 
+  MK_LOCK = $40; // CAPS LOCK or SHIFT LOCK
 {$IFDEF WIN_GDI}
 
 {$IFNDEF NOT_USE_RICHEDIT}
@@ -6159,7 +6143,6 @@ TStyle = packed record     //todo: размер множества в fpc 4 байта !!!
        |</table> For more info, see Win32.hlp (keyword 'WndClass');
     }
 
-
 {$IFDEF GRAPHCTL_XPSTYLES}
     property edgeStyle : TEdgeStyle
              read {$IFnDEF STORE_EDGESTYLE} GetEdgeStyle {$ELSE} fEdgeStyle {$ENDIF}
@@ -6818,7 +6801,7 @@ TStyle = packed record     //todo: размер множества в fpc 4 байта !!!
        in such case it is no more necessary to call also this method, but
        calling it therefore is not an error. }
 
-    property OnMessage: TOnMessage  
+    property OnMessage: TOnMessage
              read {$IFDEF EVENTS_DYNAMIC} Get_OnMessage {$ELSE} EV.fOnMessage {$ENDIF}
              write {$IFDEF EVENTS_DYNAMIC} Set_OnMessage {$ELSE} EV.fOnMessage {$ENDIF};
     {* |<#appbutton>
@@ -9836,7 +9819,6 @@ procedure FormSetSBMax( Form: PControl );
 procedure FormSetSBPosition( Form: PControl );
 procedure FormSetSBPageSize( Form: PControl );
 
-
 procedure FormLastCreatedChildAsNewCurrentParent( Form: PControl );
 procedure FormSetUpperParent( Form: PControl );
 procedure FormSetTabpageAsParent( Form: PControl );
@@ -9845,7 +9827,6 @@ procedure FormSetCurCtl( Form: PControl );
 procedure FormSetParent( Form: PControl );
 procedure FormSetEvent( Form: PControl );
 procedure FormSetIndexedEvent( Form: PControl );
-
 
 {$IFDEF WIN_GDI}
 function ToolbarButtonRect( Toolbar: PControl; BtnID: Integer ): TRect;
@@ -10328,7 +10309,7 @@ type
   PHHNTrack = ^THHNTrack;
   tagHHNTRACK = {packed} record                  //tagHHNTRACK, HHNTRACK;
     hdr:               TNMHdr;
-    pszCurUrl:         PAnsiChar;                  // Multi-byte, null-terminated string  
+    pszCurUrl:         PAnsiChar;                  // Multi-byte, null-terminated string
     idAction:          Integer;                // HHACT_ value
     phhWinType:        PHHWinType;             // Current window type structure
   end;
@@ -11032,20 +11013,7 @@ type
     fEnabled: Boolean;
     fInterval: Integer;
     fOnTimer: TOnEvent;
-    {$IFDEF LIN}
-    {$IFNDEF GTK}
-    {$IFNDEF QT}
-    fPrev, fNext: PTimer; // двусвязный список всех _активных_ таймеров
-    fTimeStart: clock_t;
-    fExpireNext: clock_t;
-    fExpireTotal: Int64;
-    fTimerHandled: Boolean;
-    fResolution: Integer;
-    fPeriodic: Boolean;
-    fMultimedia: Boolean;
-    {$ENDIF  QT}
-    {$ENDIF  GTK}
-    {$ENDIF}
+
     procedure SetEnabled(const Value: Boolean); {$IFDEF WIN} virtual; {$ENDIF}
     procedure SetInterval(const Value: Integer);
   protected
@@ -11062,14 +11030,7 @@ type
        add a conditional definition SUPPORT_LONG_TIMER to the project options. }
     property OnTimer : TOnEvent read fOnTimer write fOnTimer;
     {* Event, which is called when time interval is over. }
-    {$IFDEF LIN}
-    {$IFNDEF GTK}
-    {$IFNDEF QT}
-    property Resolution: Integer read fResolution write fResolution; // dummy property, just for compatibility
-    property Periodic: Boolean read fPeriodic write fPeriodic;
-    {$ENDIF  QT}
-    {$ENDIF  GTK}
-    {$ENDIF LIN}
+
   end;
 
 function NewTimer( Interval: Integer ): PTimer;
@@ -11107,10 +11068,6 @@ function NewMMTimer( Interval: Integer ): PMMTimer;
    Periodic = TRUE and Enabled = FALSE. Do not forget also to assign your
    event handler to OnTimer to do something on timer shot. }
 {$ENDIF WIN}
-
-{$IFDEF LIN}
-function NewMMTimer( Interval: Integer ): PTimer;
-{$ENDIF LIN}
 
 {$IFDEF WIN_GDI} //vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 { -- TTrayIcon object -- }
@@ -11877,7 +11834,7 @@ const KOI8_Rus: array[ #$C0..#$FF ] of AnsiChar = (
        'Я', 'Р', 'С', 'Т', 'У', 'Ж', 'В', 'Ь', 'Ы', 'З', 'Ш', 'Э', 'Щ', 'Ч', 'Ъ'}
        #$FE,
        #$E0, #$E1, #$F6, #$E4, #$E5, #$F4, #$E3, #$F5, #$E8, #$E9, #$EA, #$EB, #$EC, #$ED, #$EE, #$EF,
-       #$FF, #$F0, #$F1, #$F2, #$F3, #$E6, #$E2, #$FC, #$FB, #$E7, #$F8, #$FD, #$F9, #$F7, #$FA, 
+       #$FF, #$F0, #$F1, #$F2, #$F3, #$E6, #$E2, #$FC, #$FB, #$E7, #$F8, #$FD, #$F9, #$F7, #$FA,
        #$DE,
        #$C0, #$C1, #$D6, #$C4, #$C5, #$D4, #$C3, #$D5, #$C8, #$C9, #$CA, #$CB, #$CC, #$CD, #$CE, #$CF,
        #$DF, #$D0, #$D1, #$D2, #$D3, #$C6, #$C2, #$DC, #$DB, #$C7, #$D8, #$DD, #$D9, #$D7, #$DA
@@ -12128,56 +12085,56 @@ function Str2TimeShort(const S: KOLString): TDateTime;
 {$ENDIF WIN_GDI}
 
 const
-  ofOpenRead          = {$IFDEF LIN} O_RDONLY {$ELSE} $80000000 {$ENDIF};
+  ofOpenRead          = $80000000 ;
   {* Use this flag (in combination with others) to open file for "read" only. }
-  ofOpenWrite         = {$IFDEF LIN} O_WRONLY {$ELSE} $40000000 {$ENDIF};
+  ofOpenWrite         = $40000000 ;
   {* Use this flag (in combination with others) to open file for "write" only. }
-  ofOpenReadWrite     = {$IFDEF LIN} O_RDWR {$ELSE} $C0000000 {$ENDIF};
+  ofOpenReadWrite     = $C0000000 ;
   {* Use this flag (in combination with others) to open file for "read" and "write". }
 
-  ofShareExclusive    = {$IFDEF LIN} $10 {$ELSE} $00 {$ENDIF};
+  ofShareExclusive    = $00 ;
   {* Use this flag (in combination with others) to open file for exclusive use. }
-  ofShareDenyWrite    = {$IFDEF LIN} $20 {$ELSE} $01 {$ENDIF};
+  ofShareDenyWrite    = $01 ;
   {* Use this flag (in combination with others) to open file in share mode, when
      only attempts to open it in other process for "write" will be impossible.
      I.e., other processes could open this file simultaneously for read only
      access. }
-  ofShareDenyRead     = {$IFDEF LIN} 0 {not supported} {$ELSE} $02 {$ENDIF};
+  ofShareDenyRead     = $02 ;
   {* Use this flag (in combination with others) to open file in share mode, when
      only attempts to open it for "read" in other processes will be disabled.
      I.e., other processes could open it for "write" only access. }
-  ofShareDenyNone     = {$IFDEF LIN} $30 {$ELSE} $03 {$ENDIF};
+  ofShareDenyNone     = $03 ;
   {* Use this flag (in combination with others) to open file in full sharing mode.
      I.e. any process will be able open this file using the same share flag. }
-  ofCreateNew         = {$IFDEF LIN} O_CREAT or O_TRUNC {$ELSE} $100 {$ENDIF};
+  ofCreateNew         = $100 ;
   {* Default creation disposition. Use this flag for creating new file (usually
      for write access. }
-  ofCreateAlways      = {$IFDEF LIN} O_CREAT {$ELSE} $200 {$ENDIF};
+  ofCreateAlways      = $200 ;
   {* Use this flag (in combination with others) to open existing or creating new
      file. If existing file is opened, it is truncated to size 0. }
-  ofOpenExisting      = {$IFDEF LIN} 0 {$ELSE} $300 {$ENDIF};
+  ofOpenExisting      = $300 ;
   {* Use this flag (in combination with others) to open existing file only. }
-  ofOpenAlways        = {$IFDEF LIN} O_CREAT {$ELSE} $400 {$ENDIF};
+  ofOpenAlways        = $400 ;
   {* Use this flag (in combination with others) to open existing or create new
      (if such file is not yet exists). }
-  ofTruncateExisting  = {$IFDEF LIN} O_TRUNC {$ELSE} $500 {$ENDIF};
+  ofTruncateExisting  = $500 ;
   {* Use this flag (in combination with others) to open existing file and truncate
      it to size 0. }
 
-  ofAttrReadOnly = {$IFDEF LIN} 0 {$ELSE} $10000 {$ENDIF};
+  ofAttrReadOnly = $10000 ;
   {* Use this flag to create Read-Only file (?). }
-  ofAttrHidden   = {$IFDEF LIN} 0 {$ELSE} $20000 {$ENDIF};
+  ofAttrHidden   = $20000 ;
   {* Use this flag to create hidden file. }
-  ofAttrSystem   = {$IFDEF LIN} 0 {$ELSE} $40000 {$ENDIF};
+  ofAttrSystem   = $40000 ;
   {* Use this flag to create system file. }
-  ofAttrTemp       = {$IFDEF LIN} 0 {$ELSE} $1000000 {$ENDIF};
+  ofAttrTemp       = $1000000 ;
   {* Use this flag to create temp file. }
-  ofAttrArchive  = {$IFDEF LIN} 0 {$ELSE} $200000 {$ENDIF};
+  ofAttrArchive  = $200000 ;
   {* Use this flag to create archive file. }
-  ofAttrCompressed = {$IFDEF LIN} 0 {$ELSE} $8000000 {$ENDIF};
+  ofAttrCompressed = $8000000 ;
   {* Use this flag to create compressed file. Has effect only on NTFS, and
      only if ofAttrCompressed is not specified also. }
-  ofAttrOffline    = {$IFDEF LIN} 0 {$ELSE} $10000000 {$ENDIF};
+  ofAttrOffline    = $10000000 ;
   {* Use this flag to create offline file. }
 
 {$IFDEF _D3orHigher}
@@ -12221,9 +12178,7 @@ function FileSeek(Handle: THandle; {$IFNDEF STREAM_COMPAT} const {$ENDIF} MoveTo
 function FileRead(Handle: THandle; var Buffer; Count: DWord): DWord;
 {* Reads bytes from current position in file to buffer. Returns number of
    read bytes. }
-{$IFDEF LIN}
-function GetFileSize( Handle: THandle; HiSize: PDWORD ): DWORD;
-{$ENDIF LIN}
+
 function File2Str(Handle: THandle): AnsiString;
 {* Reads file from current position to the end and returns result as ansi string. }
 {$IFNDEF _D2}
@@ -12354,8 +12309,6 @@ function ExePath: KOLString;
    of the process in which context dll hook function is called). }
 function ModulePath: KOLString;
 {* Returns the path to the module (exe, dll) itself. }
-
-
 
 //---------------------------------------------------------
 // Following functions/procedures are created by Edward Aretino:
@@ -12798,7 +12751,7 @@ type
        a separate Applet object is used. }
     property OpenReadOnly: Boolean read fOpenReadOnly;
     {* TRUE after Execute, if Read Only check box was checked by the user.
-       Options are not affected anyway. } 
+       Options are not affected anyway. }
   end;
 
 const DefOpenSaveDlgOptions: TOpenSaveOptions = [ OSHideReadonly,
@@ -13605,7 +13558,6 @@ function WindowsShutdown( const Machine : KOLString; Force, Reboot : Boolean ) :
    Pass Reboot = True to reboot immediately after shut down. }
 function WindowsLogoff( Force : Boolean ) : Boolean;
 {* Log off Windows. }
-
 
 type
   TWindowsVersion = ( wv31, wv95, wv98, wvME, wvNT, wvY2K, wvXP, wvServer2003,
@@ -14668,7 +14620,6 @@ const
   FOF_SIMPLEPROGRESS         = $0100;  { means don't show names of files }
   FOF_NOCONFIRMMKDIR         = $0200;  { don't confirm making any needed dirs }
   FOF_NOERRORUI              = $0400;  { don't put up error UI }
-
 
 {$IFDEF UNICODE_CTRLS}
 function SHFileOperationW(const lpFileOp: TSHFileOpStructW): Integer; stdcall;
@@ -16207,46 +16158,16 @@ begin
 end;
 {$ENDIF PAS_VERSION}
 
-{$IFDEF OLD_REFCOUNT}
-{$IFDEF ASM_VERSION}{$ELSE PAS_VERSION} //Pascal
-procedure TObj.DoDestroy;
-begin
-  {$IFDEF OLD_REFCOUNT}
-  if  fRefCount > 0 then
-  begin
-      if not LongBool( fRefCount and 1) then
-      Dec( fRefCount, 2 );
-      RefDec;
-  end else
-      Self.Destroy;
-  if  fRefCount <> 0 then
-  begin
-      if not LongBool( fRefCount and 1) then
-         Dec( fRefCount );
-  end else
-      Self.Destroy;
-  {$ELSE}
-  if   fRefCount > 0 then
-       RefDec
-  else Self.Destroy;
-  {$ENDIF}
-end;
-{$ENDIF PAS_VERSION}
-{$ENDIF OLD_REFCOUNT}
-
 {$IFDEF ASM_VERSION}{$ELSE PAS_VERSION} //Pascal
 function TObj.RefDec: Integer;
 begin
   Result := 0; // stop Delphi alerting the Warning
   if  @ Self = nil then Exit; {>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>}
   Dec( fRefCount, 2 );
-  {$IFDEF OLD_REFCOUNT}
-  if  (fRefCount < 0) and LongBool(fRefCount and 1) then
-      Destroy;
-  {$ELSE}
+
   if  fRefCount < 0 then
       Destroy;
-  {$ENDIF}
+
 end;
 {$ENDIF PAS_VERSION}
 
@@ -16274,15 +16195,6 @@ asm
        MOV    RAX, [RCX-8]
 {$ENDIF}
 end;
-
-{$IFDEF OLD_FREE}
-{$IFDEF ASM_VERSION}{$ELSE PAS_VERSION}
-procedure TObj.Free;
-begin
-    RefDec;
-end;
-{$ENDIF PAS_VERSION}
-{$ENDIF OLD_FREE}
 
 {$UNDEF ASM_LOCAL}
 {$IFDEF ASM_VERSION} {$DEFINE ASM_LOCAL} {$ENDIF}
@@ -17879,7 +17791,7 @@ begin
       {$ENDIF}
     end;
     Result := Sender.fTmpBrush;
-    {$ELSE} Result := 0; 
+    {$ELSE} Result := 0;
     {$ENDIF GDI}
   end;
 end;
@@ -18053,12 +17965,9 @@ begin
   Result := nil;
   if Value = nil then
   begin
-    {$IFDEF OLD_REFCOUNT}
-    if @Self <> nil then
-       DoDestroy;
-    {$ELSE}
+
     Free;
-    {$ENDIF}
+
     Exit; {>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>}
   end;
   _Self := @Self;
@@ -18504,7 +18413,7 @@ asm
          XCHG   EDX, EAX
          MOV    EAX, [EDX].TGraphicTool.fHandle
          TEST   EAX, EAX
-         JNZ    @@exit 
+         JNZ    @@exit
          PUSH   EDX
          LEA    ECX, [EDX].TGraphicTool.fData.Font
          PUSH   ECX
@@ -21678,7 +21587,7 @@ begin
     Result := FALSE;
     PP1 := P1;
     PP2 := P2;
-    while (Length > 0) do 
+    while (Length > 0) do
     begin
         if  (PP1^ <> PP2^) then
             Exit; //>>>>>>>>>>>>>>>>>>>>>>>>
@@ -23151,7 +23060,6 @@ asm
 end {$IFDEF F_P} [ 'EAX', 'EDX', 'ECX' ] {$ENDIF};
 {$ENDIF PAS_ONLY}
 
-
 {$IFNDEF _FPC}
 
 {$IFDEF WIN}
@@ -23476,7 +23384,7 @@ begin
   Size := GetFileSize( Handle, nil );
   SetString( Result, nil, (Size - Pos + 1) div Sizeof( WideChar ) + 1 ); // fixed by zhoudi
   FileRead( Handle, Result[ 1 ], Size - Pos );
-  Result[ Length(Result) ] := #0; // fixed by zhoudi 
+  Result[ Length(Result) ] := #0; // fixed by zhoudi
 end;
 {$ENDIF _D2}
 
@@ -23664,7 +23572,7 @@ begin
   F := FileCreate( filepath, ofOpenWrite or ofOpenAlways or ofShareDenyWrite );
   if F = INVALID_HANDLE_VALUE then Exit; {>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>}
   FileSeek( F, 0, spEnd );
-  Tmp := Tmp + str + {$IFDEF LIN} #10 {$ELSE} #13#10 {$ENDIF};
+  Tmp := Tmp + str + #13#10 ;
   FileWrite( F, PKOLChar( Tmp )^, Length( Tmp ) * Sizeof(KOLChar) );
   FileClose( F );
 end;
@@ -23730,7 +23638,7 @@ var BytesToSave: Integer;
 begin
   BytesToSave := Length( Str ) * Sizeof(WideChar);
   Result := Mem2File( PKOLChar( Filename ), PWideChar( Str ), BytesToSave )
-            = BytesToSave; // fixed by zhoudi 
+            = BytesToSave; // fixed by zhoudi
 end;
 {$ENDIF _D2}
 
@@ -23984,7 +23892,7 @@ begin
   {$ELSE}
     I := GetModuleFileName( 0, Buffer, MAX_PATH );
     for I := I downto 0 do
-      if Buffer[ I ] = {$IFDEF LIN} '/' {$ELSE} '\' {$ENDIF} then
+      if Buffer[ I ] = '\' then
       begin
         Buffer[ I + 1 ] := #0;
         break;
@@ -24016,7 +23924,7 @@ var DirList: PDirList;
     I: Integer;
 begin
   Result := MakeInt64( 0, 0 );
-  DirList := NewDirList( Path, {$IFDEF LIN} '*' {$ELSE} '*.*' {$ENDIF}, 0 );
+  DirList := NewDirList( Path, '*.*' , 0 );
   for I := 0 to DirList.Count-1 do
   begin
     if   LongBool( DirList.Items[ I ].dwFileAttributes and FILE_ATTRIBUTE_DIRECTORY ) then
@@ -24065,7 +23973,6 @@ begin
     Result := Result + KOLString(C);
 end;
 {$ENDIF PAS_VERSION}
-
 
 //---------------------------------------------------------
 // Following functions/procedures are created by Edward Aretino:
@@ -24127,7 +24034,7 @@ asm
 @@ret_0:
         POP      EAX
         {$IFDEF _D2009orHigher}
-        PUSH     0 
+        PUSH     0
         {$ENDIF}
         CALL     System.@LStrFromPCharLen
 end;
@@ -24394,10 +24301,10 @@ end;
 function GetTempDir : KOLString;
 {$IFDEF WIN} var Buf : Array[ 0..MAX_PATH ] of KOLChar; {$ENDIF WIN}
 begin
-  {$IFDEF LIN} Result := '/tmp/'; {$ELSE WIN}
+
   GetTempPath( MAX_PATH + 1, @Buf[ 0 ] );
   Result := IncludeTrailingPathDelimiter( PKOLChar( @ Buf[ 0 ] ) );
-  {$ENDIF WIN}
+
 end;
 {$ENDIF}
 
@@ -24422,7 +24329,7 @@ var
 begin
    result := '';
    if (FPath<>'') then FPath := IncludeTrailingPathDelimiter( FPath );
-   if (FMask<>'') and (FMask[1]={$IFDEF LIN} '/' {$ELSE} '\' {$ENDIF}) then
+   if (FMask<>'') and (FMask[1]= '\' ) then
      FMask := CopyEnd(FMask,2);
    dir:=FPath+FMask;
    succ := Find_First(dir, Srch);
@@ -28149,7 +28056,6 @@ begin
   Strm.fData.fBaseStream.fMethods.fClose( Strm.fData.fBaseStream );
 end;
 
-
 function NewFileStream( const FileName: KOLString; Options: DWORD ): PStream;
 begin
   Result := _NewStream( BaseFileMethods );
@@ -28331,7 +28237,7 @@ asm
         POP      EBX
 end;
 {$ELSE PAS_VERSION}
-function WriteExMemoryStream( Strm: PStream; var Buffer; {$IFNDEF STREAM_COMPAT} const {$ENDIF} Count: TStrmSize ): TStrmSize; 
+function WriteExMemoryStream( Strm: PStream; var Buffer; {$IFNDEF STREAM_COMPAT} const {$ENDIF} Count: TStrmSize ): TStrmSize;
 var S: PStream;
     C: TStrmSize;
 begin
@@ -28980,7 +28886,6 @@ const
   MIDATA_CHECKITEM = $40000000;
   MIDATA_RADIOITEM = $80000000;
 
-
 {$IFNDEF NEW_MENU_ACCELL}
 function WndProcMenu( Sender: PControl; var Msg: TMsg; var Rslt: LRESULT): Boolean;
 var M, M1: PMenu;
@@ -29047,7 +28952,7 @@ function WndProcMenu( Sender: PControl; var Msg: TMsg; var Rslt: LRESULT): Boole
       begin
           {$IFDEF USE_MENU_CURCTL}
               M.fCurCtl := Sender;   // fixed
-          {$ENDIF}                 
+          {$ENDIF}
           M1.FOnMenuItem( M, Idx )
       end else if Assigned( M.FOnMenuItem ) then
           M.FOnMenuItem( M, Idx );
@@ -30008,12 +29913,12 @@ begin
     MII.cch := {$IFDEF UNICODE_CTRLS} WStrLen( S ) {$ELSE} StrLen( S ) {$ENDIF};
     {$IFDEF FPC}
     InsertMenuItem( AHandle, DWORD(-1), True, PMenuitemInfo( @ MII )^ );
-    {$ELSE} 
+    {$ELSE}
     {$IFNDEF UNICODE_CTRLS}
     InsertMenuItem( AHandle, DWORD(-1), True, PMenuitemInfoA( @ MII )^ );
     {$ELSE}
     InsertMenuItemW( AHandle, DWORD(-1), True, PMenuitemInfoW( @ MII )^ );
-    {$ENDIF}   
+    {$ENDIF}
     {$ENDIF}
     if Item.FHandle <> 0 then
       I := Item.FillMenuItems( Item.FHandle, I + 2, Template )
@@ -31675,7 +31580,7 @@ asm
         JMP      @@1
 @@fixed_in_options:
         {$IFDEF  USE_FLAGS}
-        TEST     [EDI].TControl.fFlagsG4, 1 shl G4_Checked 
+        TEST     [EDI].TControl.fFlagsG4, 1 shl G4_Checked
         {$ELSE}
         TEST     byte ptr [EDI].TControl.fChecked, 1
         {$ENDIF}
@@ -33052,7 +32957,7 @@ begin
          {!ecm}
          SB_THUMBPOSITION,SB_THUMBTRACK: NewPos := SI.nTrackPos;
          SB_ENDSCROLL: NewPos := SI.nPos;
-         {/!ecm}         
+         {/!ecm}
          else Exit; {>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>}
        end;
 
@@ -36457,7 +36362,7 @@ asm
         AND      [EBX].TControl.fFlagsG2, not (1 shl G2_DoubleBuffered)
         {$ELSE}
         INC      [EBX].TControl.fCannotDoubleBuf
-        MOV      [EBX].TControl.fDoubleBuffered, 0 
+        MOV      [EBX].TControl.fDoubleBuffered, 0
         {$ENDIF  USE_FLAGS}
         ADD      [EBX].TControl.fBoundsRect.Right, 100-64
         ADD      [EBX].TControl.fBoundsRect.Bottom, 200-64
@@ -36657,7 +36562,7 @@ begin
     Log( '//// OleInit OK: call NewRichEdit1' );
     {$ENDIF INPACKAGE}
     {$IFDEF UNICODE_CTRLS}
-    RichEditIdx := 0; 
+    RichEditIdx := 0;
     {$ELSE}
     RichEditIdx := 0; // Richedit20A / RichEdit
     {$ENDIF}
@@ -37255,7 +37160,6 @@ begin
    Log( '/// CreateWindowEx called' );
    {$ENDIF INPACKAGE}
 
-
    {$IFDEF DEBUG_CREATEWINDOW}
 	 if fHandle = 0 then
          begin
@@ -37756,7 +37660,7 @@ begin
                          AppletTerminated := TRUE;
                        end;
                        Default;
-                     end;               
+                     end;
                    WM_NCDESTROY:
                        {$IFnDEF SMALLER_CODE}
                        if  fHandle = Msg.hwnd then
@@ -40335,7 +40239,6 @@ begin
         Sender.Perform(WM_ERASEBKGND, WPARAM(PDC), 0);
     Sender.Perform(WM_PAINT, WPARAM(PDC), 0);
 
-
     Wnd := GetWindow( Sender.fHandle, GW_CHILD );
     Wnd := GetWindow( Wnd, GW_HWNDLAST);
     while Wnd <> 0 do begin
@@ -42318,7 +42221,7 @@ asm
 
 @@call_recur:
           //OR       EBP, 1 // Result := TRUE;
-          INC      EBP  
+          INC      EBP
           POP      EAX
           {$IFDEF USE_FLAGS}
           TEST    [EAX].TControl.fStyle.f3_Style, (1 shl F3_Disabled)
@@ -43949,7 +43852,7 @@ begin
      for I := 0 to fCount - 1 do
        Inc(Size, StrLen( PAnsiChar(fList.
          {$IFDEF TLIST_FAST} Items {$ELSE} fItems {$ENDIF} [I]) ) +
-                 {$IFDEF LIN} 1 {$ELSE} 2 {$ENDIF});
+                 2 );
 
      SetString(Result, nil, Size);
 
@@ -45061,7 +44964,6 @@ begin
   if  FObjects.fCount >= C then FObjects.Delete( C );
 end;
 
-
 function TStrListEx.LastObj: PtrUInt;
 begin
   if Count = 0 then
@@ -45647,7 +45549,7 @@ begin
      end;
    end;
 end;
- 
+
 procedure TWStrList.SetValue(const AName, Value: KOLWideString);
 var
  I: Integer;
@@ -47960,7 +47862,7 @@ const
 var Self_ : POpenDirDialog;
     {$IFDEF NEW_OPEN_DIR_STYLE_EX}
     WList: HWnd;
-    ClassBuf: array[ 0..127 ] of KOLChar; 
+    ClassBuf: array[ 0..127 ] of KOLChar;
     {$ENDIF}
 begin
   Self_ := Pointer( lpData );
@@ -48846,7 +48748,6 @@ begin
   AttachProc( WndProcTBCustomDraw );
 end;
 
-
 procedure TControl.SetDroppedDown(const Value: Boolean);
 begin
   Perform( CB_SHOWDROPDOWN, WPARAM( Value ), 0 );
@@ -49706,19 +49607,6 @@ begin
   fEnabled := Value;
 end;
 {$ENDIF WIN}
-{$IFDEF LIN}
-function NewMMTimer( Interval: Integer ): PTimer;
-begin
-  Result := NewTimer( Interval );
-    {$IFNDEF GTK}
-    {$IFNDEF QT}
-  Result.fMultimedia := TRUE;
-  Result.fPeriodic := TRUE;
-  Result.fResolution := 1;
-    {$ENDIF  QT}
-    {$ENDIF  GTK}
-end;
-{$ENDIF LIN}
 
 {$IFDEF WIN_GDI} //vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 ////////////////////////////////////////////////////////////////////////
@@ -50656,7 +50544,7 @@ function MoveTetrades(Mem, From:PByte; Size: Integer;incFrom,
          xx: Integer): Integer; forward;
 function MoveRLEdata(Mem, From:PByte;Size: Integer;incFrom,
          xx: Integer): Integer; forward;
-                                        
+
 {$IFDEF ASM_VERSION} {$ELSE PAS_VERSION}
 function MoveTetrades(Mem, From:PByte; Size: Integer;incFrom,
          xx: Integer): Integer;
@@ -53242,7 +53130,7 @@ function TIcon.GetEmpty: Boolean;
 begin
   Result := (fHandle = 0)
   {$IFDEF ICONLOAD_PRESERVEBMPS}
-          and ((ImgBmp = nil) or ImgBmp.Empty) 
+          and ((ImgBmp = nil) or ImgBmp.Empty)
   {$ENDIF ICONLOAD_PRESERVEBMPS}
   ;
 end;
@@ -54687,7 +54575,7 @@ var CF: PDWORD;
     Mask: DWORD;
 begin
   REGetFont;
-  CF := Pointer( PAnsiChar( {$IFDEF STATIC_RICHEDIT_DATA} @ {$ENDIF} DF.fRECharFormatRec ) 
+  CF := Pointer( PAnsiChar( {$IFDEF STATIC_RICHEDIT_DATA} @ {$ENDIF} DF.fRECharFormatRec )
     + (HiWord(Index) and $7E) ); //dmiko
   Mask := $FFFFFFFF;
   if LongBool( HiWord(Index) and $1 ) then
@@ -54913,7 +54801,7 @@ begin
   {$IFDEF STATIC_RICHEDIT_DATA} DF.fREParaFmtRec
   {$ELSE}                       DF.fREParaFmtRec^ {$ENDIF}
       := REGetParaFmt;
-  pDw := Pointer( PAnsiChar( {$IFDEF STATIC_RICHEDIT_DATA} @ {$ENDIF} DF.fREParaFmtRec ) 
+  pDw := Pointer( PAnsiChar( {$IFDEF STATIC_RICHEDIT_DATA} @ {$ENDIF} DF.fREParaFmtRec )
     + ( HiWord( Index ) and $7E ) ); //dmiko
   Result := pDw^;
   if LongBool( HiWord( Index ) and 1 ) then
@@ -54950,7 +54838,7 @@ var pDw: PDWORD;
     Mask: Integer;
 begin
   REGetParaAttr( 0 );
-  pDw := Pointer( PAnsiChar( {$IFDEF STATIC_RICHEDIT_DATA} @ {$ENDIF} DF.fREParaFmtRec ) 
+  pDw := Pointer( PAnsiChar( {$IFDEF STATIC_RICHEDIT_DATA} @ {$ENDIF} DF.fREParaFmtRec )
     + ( HiWord( Index ) and $7E ) ); //dmiko
   Mask := 0;
   if LongBool( HiWord( Index ) and 1 ) then
@@ -56409,7 +56297,7 @@ begin
               if  Assigned( Self_.EV.fOnMouseLeave ) then
               {$ENDIF}
                   Self_.EV.fOnMouseLeave( Self_ );
-              Self_.Invalidate; 
+              Self_.Invalidate;
           end;
       end;
   end;
@@ -60114,7 +60002,7 @@ begin                                                                           
   if  eoMultiline in AOptions then                                               //
       fLookTabKeys := [ tkTab ];                                                 //
   if  eoWantTab in AOptions then                                                 //
-      exclude( fLookTabKeys, tkTab );                                  
+      exclude( fLookTabKeys, tkTab );
 end;                                                                            //
                                                                                 //
 constructor TControl.CreatePanel(AParent: PControl; AStyle: TEdgeStyle);        //
@@ -60347,7 +60235,7 @@ begin                                                                           
   ImageListNormal := AImgListNormal;                                            //
   ImageListState := AImgListState;                                              //
   fLookTabKeys := [ tkTab ];                                                    //
-end; ///////////////////////////////////////////////////////////////////////////                                                                            
+end; ///////////////////////////////////////////////////////////////////////////
 constructor TControl.CreateTabControl(AParent: PControl; ATabs: array of String;//
          AOptions: TTabControlOptions;                                          //
          AImgList: PImageList; AImgList1stIdx: Integer);                        //
@@ -60419,7 +60307,7 @@ begin                                                                           
     TBAddBitmap( ABitmap );                                                     //
   TBAddButtons( AButtons, ABtnImgIdxArray );                                    //
   Perform( WM_SIZE, 0, 0 );                                                     //
-end; ///////////////////////////////////////////////////////////////////////////                                                                            
+end; ///////////////////////////////////////////////////////////////////////////
 constructor TImageList.CreateImageList(POwner: Pointer);                        //
 var AOwner: PControl;                                                           //
 begin {*************} DoInitCommonControls( ICC_WIN95_CLASSES );                    //
@@ -62853,9 +62741,6 @@ end;
         {$I KOL_ASM_NOUNICODE.inc} //<<<<<<<<< KOL_ASM_NOUNICODE.inc
     {$ENDIF noUNICODE}
 {$ENDIF PAS_VERSION}
-{$IFDEF LIN}
-  {$DEFINE implementation} {$I KOL_Linux.inc} {$UNDEF implementation}
-{$ENDIF LIN}
 
 {$IFDEF USE_CUSTOMEXTENSIONS}
   {$I CUSTOM_CODE_EXTENSION.inc} // See comments in TControl
@@ -62873,7 +62758,7 @@ asm      PUSH  ESI
 
          MOV   EAX, Size_TEvents
          CALL  System.@GetMem
-         MOV   [ESI].TControl.EV, EAX 
+         MOV   [ESI].TControl.EV, EAX
          PUSH  EAX
          XCHG  EDX, EAX
          MOV   EAX, offset[EmptyEvents]
