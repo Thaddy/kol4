@@ -1,4 +1,4 @@
-# kol4
+# kol4 The Key Objects Library
 Kol4 is an evolution of the original kol.pas by Vladimir Kladov for Delphi and FreePascal.
 It is compatible with the FreePascal and Delphi compilers for Windows 32 and 64 bit Intel/AMD.
 Kol is a <b>framework</b> for Object Pascal. It <b>replaces</b> the VCL or LCL: do not mix.
