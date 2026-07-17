@@ -15,7 +15,7 @@
 
 //[VERSION]
 ****************************************************************
-* VERSION 3.05+
+* VERSION 4.00RC
 ****************************************************************
 //[END OF VERSION]
 
@@ -45,7 +45,7 @@ modified last time, this is not a version of KOLadd itself.
 unit KOLadd;
 
 {$IFDEF FPC}
-  {$MODE Delphi}
+  {$MODE Delphi}{$ASMMODE INTEL}{$DEFINE PAS_VERSION}
 {$ENDIF}
 
 {
@@ -57,7 +57,7 @@ interface
 
 {$I KOLDEF.INC}
 
-uses Windows, Messages, KOL;
+uses Windows, Messages, KOL4;
 
 {------------------------------------------------------------------------------)
 |                                                                              |
