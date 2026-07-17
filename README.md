@@ -11,3 +11,7 @@ I have contributed to Kol for many years, having all insights in Vladimir's mind
 Kol was in danger of disappearing from sight and that would be ashame because it is still a welcome asset to the Object Pascal community.
 
 Size still matters....
+# version
+1. 2026/06/16 initial commit based on 3.23.4
+2. 2026/06/16 removal of assembler code by my define parser
+3. 2026/06/16 renamed version to 4.00RC
