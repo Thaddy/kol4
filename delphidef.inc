@@ -1,5 +1,5 @@
 //{$DEFINE _FPC}
-{$DEFINE ASM_VERSION} // Comment this line to produce Pascal code.
+{.$DEFINE ASM_VERSION} // Comment this line to produce Pascal code.
                       // Or, just add PAS_VERSION to conditionals
                       // of your project (must be rebuilt).
 
