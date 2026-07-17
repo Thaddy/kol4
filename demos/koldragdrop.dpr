@@ -48,7 +48,11 @@ begin
     begin
       DragQueryFile(Msg.Wparam,i,@buffer,sizeof(buffer));
       {Extract the associated Icon and add it to the Imagelist, See WIN32.HLP}
+     {$ifdef fpc this will be fixed in the future}
       Images.AddIcon(ExtractAssociatedIcon(hinstance,@Buffer,@IconIndex));
+      {$else}
+     Images.AddIcon(ExtractAssociatedIcon(hinstance,Buffer,IconIndex));
+      {$endif}
       {Add the filename to the Listview and associate the Icon, see KOL docs}
       Listview.lvAdd(ExtractFileName(buffer),i,[],i,i,0);
     end;
