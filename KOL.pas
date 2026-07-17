@@ -1,8 +1,18 @@
 //[START OF KOL.pas]
-//This is unofficial version compatible with fpc >=2.6.2 and x64 compilers
-//Dmitri K dmiko@mail333.com
-//dmiko comments below mean I changed smth. in the original code
-
+// This is a KOL version 4.00 RC
+// The sourcecode is cleaned up and the assembler sections are disabled.
+// Old code is removed. Default is SMALLEST_CODE and USE_FLAGS
+// This means it is always pure pascal.
+// Modern compilers remove the need for an assembler version
+// Maintenance by Thaddy de Koning, July 2026
+// thaddydekoning[at]gmail.com
+// The project is maintained on github
+// https://github.com/Thaddy/kol4/
+// This is based unofficial version compatible with fpc >=2.6.2 and x64 compilers
+// Dmitri K dmiko@mail333.com
+// dmiko comments below means Dmitri changed smth. in the original code
+// tdk means Thaddy changed or commented the original code (no changes yet)
+// 
 {****************************************************************
 
         KKKKK    KKKKK    OOOOOOOOO    LLLLL
@@ -18,7 +28,7 @@
   Key Objects Library (C) 2000 by Vladimir Kladov.
 
 ****************************************************************
-* VERSION 3.23.4
+* VERSION 4.00 RC
 ****************************************************************
 
   K.O.L. - is a set of objects and functions to create small programs
@@ -32,6 +42,7 @@
   For code provided by other  developers (even if later
   changed by me) authors are noted in the source.
 
+  tdk these do no longer work, contact me instead on github 
   mailto: vk@kolmck.net
   Web-Page: http://kolmck.net
 
