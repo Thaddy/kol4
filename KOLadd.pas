@@ -46,6 +46,7 @@ unit KOLadd;
 
 {$IFDEF FPC}
   {$MODE Delphi}{$ASMMODE INTEL}{$DEFINE PAS_VERSION}
+  {$WARN 5024 OFF}{$WARN 5057 OFF}{$WARN 4055 OFF}
 {$ENDIF}
 
 {
@@ -57,7 +58,7 @@ interface
 
 {$I KOLDEF.INC}
 
-uses Windows, Messages, KOL4;
+uses Windows, Messages, KOL;
 
 {------------------------------------------------------------------------------)
 |                                                                              |
